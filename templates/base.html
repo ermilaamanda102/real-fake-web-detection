@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DeepfakeDetect</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        :root {
+            --green:   #1d9e75;
+            --surface: #111827;
+            --border:  #1f2937;
+            --text:    #f9fafb;
+            --muted:   #6b7280;
+        }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            min-height: 100%;
+            background: #0d0e17;
+            position: relative;
+        }
+
+        /* ── Particle canvas ── */
+        #particle-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+            display: block;
+        }
+
+        /* ── Navbar ── */
+        nav {
+            position: relative;
+            z-index: 10;
+        }
+
+        .nav-link {
+            font-size: 0.9rem;
+            color: #6b7280;
+            font-weight: 500;
+            text-decoration: none;
+            padding-bottom: 4px;
+            border-bottom: 2px solid transparent;
+            transition: color 0.15s;
+            white-space: nowrap;
+        }
+        .nav-link:hover { color: #d1d5db; }
+        .nav-link.nav-active {
+            color: #ffffff;
+            font-weight: 700;
+            border-bottom: 2px solid #4ade80;
+        }
+
+        /* ── Hamburger button (mobile only) ── */
+        .hamburger {
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            gap: 5px;
+            width: 36px;
+            height: 36px;
+            cursor: pointer;
+            background: none;
+            border: none;
+            padding: 4px;
+            border-radius: 6px;
+            transition: background 0.15s;
+        }
+        .hamburger:hover { background: rgba(255,255,255,0.06); }
+        .hamburger span {
+            display: block;
+            width: 100%;
+            height: 2px;
+            background: #9ca3af;
+            border-radius: 2px;
+            transition: transform 0.25s, opacity 0.25s;
+        }
+        .hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+        .hamburger.open span:nth-child(2) { opacity: 0; }
+        .hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+        /* ── Mobile dropdown menu ── */
+        .mobile-menu {
+            display: none;
+            flex-direction: column;
+            border-top: 1px solid rgba(255,255,255,0.08);
+            background: rgba(13,14,23,0.97);
+            position: relative;
+            z-index: 9;
+        }
+        .mobile-menu.open { display: flex; }
+        .mobile-menu .nav-link {
+            padding: 0.85rem 1.25rem;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            border-left: 3px solid transparent;
+            font-size: 0.95rem;
+        }
+        .mobile-menu .nav-link.nav-active {
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            border-left: 3px solid #4ade80;
+            color: #ffffff;
+        }
+
+        /* ── Page content ── */
+        .page-content {
+            position: relative;
+            z-index: 1;
+            padding: 2rem 2.5rem;
+        }
+
+        /* ── RESPONSIVE ── */
+        @media (max-width: 768px) {
+            .nav-links-desktop { display: none !important; }
+            .hamburger { display: flex; }
+            .page-content { padding: 1.5rem 1.25rem; }
+        }
+
+        @media (max-width: 480px) {
+            .page-content { padding: 1.25rem 1rem; }
+        }
+    </style>
+</head>
+
+<body class="text-white">
+
+<!-- Canvas particle -->
+<canvas id="particle-canvas"></canvas>
+
+<!-- ── NAVBAR ── -->
+<nav class="border-b border-white/10">
+
+    <!-- Top bar -->
+    <div style="display:flex; justify-content:space-between; align-items:center; padding: 1rem clamp(1rem, 4vw, 2.5rem);">
+
+        <!-- Logo -->
+        <a href="/" class="flex items-center gap-2 text-white font-bold" style="text-decoration:none; font-size: clamp(0.85rem, 2.5vw, 1rem);">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none"
+                 stroke="#4ade80" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;">
+                <path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96-.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.44-3.16z"/>
+                <path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96-.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.44-3.16z"/>
+            </svg>
+            DeepfakeDetect
+        </a>
+
+        <!-- Desktop nav links -->
+        <div class="nav-links-desktop" style="display:flex; gap:2rem;">
+            <a href="/"            class="nav-link {% if active=='home' %}nav-active{% endif %}">Home</a>
+            <a href="/demo"        class="nav-link {% if active=='demo' %}nav-active{% endif %}">Demo</a>
+            <a href="/performance" class="nav-link {% if active=='performance' %}nav-active{% endif %}">Performance</a>
+            <a href="/about"       class="nav-link {% if active=='about' %}nav-active{% endif %}">About</a>
+        </div>
+
+        <!-- Hamburger (mobile only) -->
+        <button class="hamburger" id="hamburger-btn" aria-label="Toggle navigation menu" aria-expanded="false">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+
+    </div>
+
+    <!-- Mobile dropdown -->
+    <div class="mobile-menu" id="mobile-menu" aria-hidden="true">
+        <a href="/"            class="nav-link {% if active=='home' %}nav-active{% endif %}">Home</a>
+        <a href="/demo"        class="nav-link {% if active=='demo' %}nav-active{% endif %}">Demo</a>
+        <a href="/performance" class="nav-link {% if active=='performance' %}nav-active{% endif %}">Performance</a>
+        <a href="/about"       class="nav-link {% if active=='about' %}nav-active{% endif %}">About</a>
+    </div>
+
+</nav>
+
+<!-- Page content -->
+<div class="page-content">
+    {% block content %}{% endblock %}
+</div>
+
+<!-- ── SCRIPTS ── -->
+<script>
+/* Hamburger menu toggle */
+const btn  = document.getElementById('hamburger-btn');
+const menu = document.getElementById('mobile-menu');
+
+btn.addEventListener('click', () => {
+    const isOpen = menu.classList.toggle('open');
+    btn.classList.toggle('open', isOpen);
+    btn.setAttribute('aria-expanded', String(isOpen));
+    menu.setAttribute('aria-hidden', String(!isOpen));
+});
+
+menu.querySelectorAll('.nav-link').forEach(link => {
+    link.addEventListener('click', () => {
+        menu.classList.remove('open');
+        btn.classList.remove('open');
+        btn.setAttribute('aria-expanded', 'false');
+        menu.setAttribute('aria-hidden', 'true');
+    });
+});
+
+window.addEventListener('resize', () => {
+    if (window.innerWidth > 768) {
+        menu.classList.remove('open');
+        btn.classList.remove('open');
+        btn.setAttribute('aria-expanded', 'false');
+        menu.setAttribute('aria-hidden', 'true');
+    }
+});
+</script>
+
+<script>
+/* Particle animation */
+(function () {
+    const canvas = document.getElementById('particle-canvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+
+    let W, H, particles = [];
+    const mouse = { x: -999, y: -999 };
+
+    function getCount() {
+        if (window.innerWidth < 480) return 25;
+        if (window.innerWidth < 768) return 45;
+        return 90;
+    }
+
+    const MAX_DIST = 140;
+    const COLOR    = '74, 222, 128';
+
+    function resize() {
+        W = canvas.width  = window.innerWidth;
+        H = canvas.height = window.innerHeight;
+    }
+
+    function Particle() {
+        this.x  = Math.random() * W;
+        this.y  = Math.random() * H;
+        this.vx = (Math.random() - 0.5) * 0.4;
+        this.vy = (Math.random() - 0.5) * 0.4;
+        this.r  = Math.random() * 1.5 + 0.8;
+    }
+
+    Particle.prototype.update = function () {
+        this.x += this.vx;
+        this.y += this.vy;
+        if (this.x < 0 || this.x > W) this.vx *= -1;
+        if (this.y < 0 || this.y > H) this.vy *= -1;
+    };
+
+    function init() {
+        particles = [];
+        const count = getCount();
+        for (let i = 0; i < count; i++) particles.push(new Particle());
+    }
+
+    let animId;
+    function draw() {
+        ctx.clearRect(0, 0, W, H);
+
+        for (let i = 0; i < particles.length; i++) {
+            const p = particles[i];
+            p.update();
+
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(${COLOR}, 0.6)`;
+            ctx.fill();
+
+            for (let j = i + 1; j < particles.length; j++) {
+                const q    = particles[j];
+                const dx   = p.x - q.x;
+                const dy   = p.y - q.y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                if (dist < MAX_DIST) {
+                    const alpha = (1 - dist / MAX_DIST) * 0.2;
+                    ctx.beginPath();
+                    ctx.moveTo(p.x, p.y);
+                    ctx.lineTo(q.x, q.y);
+                    ctx.strokeStyle = `rgba(${COLOR}, ${alpha})`;
+                    ctx.lineWidth   = 0.7;
+                    ctx.stroke();
+                }
+            }
+
+            const mdx   = p.x - mouse.x;
+            const mdy   = p.y - mouse.y;
+            const mdist = Math.sqrt(mdx * mdx + mdy * mdy);
+            if (mdist < MAX_DIST * 1.5) {
+                const alpha = (1 - mdist / (MAX_DIST * 1.5)) * 0.45;
+                ctx.beginPath();
+                ctx.moveTo(p.x, p.y);
+                ctx.lineTo(mouse.x, mouse.y);
+                ctx.strokeStyle = `rgba(${COLOR}, ${alpha})`;
+                ctx.lineWidth   = 0.9;
+                ctx.stroke();
+            }
+        }
+
+        animId = requestAnimationFrame(draw);
+    }
+
+    let resizeTimer;
+    window.addEventListener('resize', () => {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(() => { resize(); init(); }, 150);
+    });
+
+    window.addEventListener('mousemove',  e => { mouse.x = e.clientX; mouse.y = e.clientY; });
+    window.addEventListener('mouseleave', ()  => { mouse.x = -999; mouse.y = -999; });
+
+    window.addEventListener('touchmove', e => {
+        if (e.touches.length > 0) {
+            mouse.x = e.touches[0].clientX;
+            mouse.y = e.touches[0].clientY;
+        }
+    }, { passive: true });
+    window.addEventListener('touchend', () => { mouse.x = -999; mouse.y = -999; });
+
+    /* Pause saat tab tidak aktif untuk hemat baterai HP */
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+            cancelAnimationFrame(animId);
+        } else {
+            draw();
+        }
+    });
+
+    resize();
+    init();
+    draw();
+})();
+</script>
+
+</body>
+</html>

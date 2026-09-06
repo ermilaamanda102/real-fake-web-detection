@@ -1,0 +1,355 @@
+{% extends "base.html" %}
+{% block content %}
+{% set active='about' %}
+
+<style>
+  /* ── BASE ── */
+  .about-header { padding: 3rem 0 0; animation: fadeUp 0.6s ease both; }
+  .about-title { font-family: 'Syne', sans-serif; font-size: clamp(1.6rem, 4vw, 3rem); font-weight: 800; color: #ffffff; letter-spacing: -0.03em; margin: 0 0 0.5rem; }
+  .about-sub { font-size: 0.9rem; color: var(--muted); }
+
+  /* ── PIPELINE ── */
+  .pipeline-section { margin-top: 2.5rem; animation: fadeUp 0.6s ease 0.1s both; }
+  .section-title { font-family: 'Syne', sans-serif; font-size: 1.15rem; font-weight: 700; color: #ffffff; margin: 0 0 1.25rem; }
+
+  .pipeline-scroll {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+  }
+
+  .pipeline-step {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 1rem;
+    padding: 1.25rem 1rem;
+    flex: 1 1 140px;
+    max-width: 200px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 0.65rem;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+  .pipeline-step:hover { border-color: var(--green); transform: translateY(-3px); }
+
+  .step-icon { width: 44px; height: 44px; background: #132b20; border-radius: 0.75rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .step-icon svg { width: 20px; height: 20px; stroke: var(--green); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .step-name { font-family: 'Syne', sans-serif; font-size: 0.85rem; font-weight: 700; color: var(--text); }
+  .step-desc { font-size: 0.73rem; color: var(--muted); line-height: 1.5; }
+
+  .step-arrow {
+    color: var(--muted);
+    font-size: 1.1rem;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    user-select: none;
+  }
+
+  /* ── DETAIL GRID ── */
+  .detail-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-top: 2rem;
+    animation: fadeUp 0.6s ease 0.2s both;
+  }
+  .detail-card { background: var(--surface); border: 1px solid var(--border); border-radius: 1rem; padding: 1.5rem 1.25rem; }
+  .detail-card-title { font-family: 'Syne', sans-serif; font-size: 0.95rem; font-weight: 700; color: var(--text); margin: 0 0 1.1rem; display: flex; align-items: center; gap: 0.5rem; }
+  .detail-card-title svg { width: 16px; height: 16px; stroke: var(--green); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+  .detail-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 0.5rem; padding: 0.55rem 0; border-bottom: 1px solid var(--border); font-size: 0.82rem; }
+  .detail-row:last-child { border-bottom: none; }
+  .detail-row .dk { color: var(--muted); flex: 1; }
+  .detail-row .dv { color: var(--text); font-weight: 600; text-align: right; white-space: nowrap; }
+  .detail-row .dv.green { color: var(--green); }
+
+  /* ── FOOTER ── */
+  .site-footer {
+    margin-top: 4rem;
+    padding: 2.5rem 0 0;
+    border-top: 1px solid var(--border);
+    animation: fadeUp 0.6s ease 0.3s both;
+  }
+  .footer-inner {
+    display: grid;
+    grid-template-columns: 1.6fr 1fr 1fr;
+    gap: 2.5rem;
+    padding-bottom: 2.5rem;
+  }
+  .footer-logo { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.85rem; }
+  .footer-logo-icon {
+    width: 32px; height: 32px;
+    background: var(--green);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Syne', sans-serif; font-size: 0.75rem; font-weight: 800;
+    color: #060810; letter-spacing: -0.03em; flex-shrink: 0;
+  }
+  .footer-logo-name { font-family: 'Syne', sans-serif; font-size: 0.95rem; font-weight: 800; color: var(--text); }
+  .footer-tagline { font-size: 0.82rem; color: var(--muted); line-height: 1.65; max-width: 280px; }
+  .footer-col-title { font-family: 'Syne', sans-serif; font-size: 0.78rem; font-weight: 700; color: var(--text); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 1rem; }
+  .footer-links { display: flex; flex-direction: column; gap: 0.55rem; }
+  .footer-link { font-size: 0.83rem; color: var(--muted); text-decoration: none; transition: color 0.15s; width: fit-content; }
+  .footer-link:hover { color: var(--text); }
+  .footer-contact-list { display: flex; flex-direction: column; gap: 0.65rem; }
+  .footer-contact-item { display: flex; align-items: center; gap: 0.65rem; text-decoration: none; transition: opacity 0.15s; }
+  .footer-contact-item:hover { opacity: 0.75; }
+  .fci-icon { width: 32px; height: 32px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: border-color 0.15s, background 0.15s; }
+  .footer-contact-item:hover .fci-icon { border-color: var(--green); background: rgba(29,158,117,0.08); }
+  .fci-icon svg { width: 15px; height: 15px; stroke: var(--muted); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; transition: stroke 0.15s; }
+  .footer-contact-item:hover .fci-icon svg { stroke: var(--green); }
+  .fci-label { font-size: 0.68rem; color: var(--muted); letter-spacing: 0.04em; margin-bottom: 1px; }
+  .fci-value { font-size: 0.8rem; color: var(--text); font-weight: 500; }
+  .footer-bottom { border-top: 1px solid var(--border); padding: 1.25rem 0; display: flex; align-items: center; justify-content: center; }
+  .footer-copy { font-size: 0.78rem; color: var(--muted); text-align: center; }
+  .footer-copy span { color: var(--green); }
+
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* ── RESPONSIVE ── */
+
+  /* Tablet: 768px ke bawah */
+  @media (max-width: 768px) {
+    .detail-grid {
+      grid-template-columns: 1fr;
+    }
+    .footer-inner {
+      grid-template-columns: 1fr 1fr;
+    }
+    .footer-brand {
+      grid-column: 1 / -1;
+    }
+    .footer-tagline {
+      max-width: 100%;
+    }
+    .pipeline-step {
+      flex: 1 1 130px;
+    }
+  }
+
+  /* Mobile: 480px ke bawah */
+  @media (max-width: 480px) {
+    .about-header { padding: 2rem 0 0; }
+
+    .pipeline-scroll {
+      flex-direction: column;
+      align-items: stretch;
+    }
+    .pipeline-step {
+      flex-direction: row;
+      max-width: 100%;
+      text-align: left;
+      align-items: flex-start;
+      padding: 1rem;
+      gap: 0.85rem;
+    }
+    .step-icon { flex-shrink: 0; }
+    .step-content { display: flex; flex-direction: column; gap: 0.2rem; }
+    .step-name { font-size: 0.88rem; }
+    .step-arrow {
+      align-self: center;
+      transform: rotate(90deg);
+    }
+
+    .detail-card { padding: 1.25rem 1rem; }
+    .detail-row { font-size: 0.78rem; }
+    .detail-row .dv { font-size: 0.78rem; }
+
+    .footer-inner {
+      grid-template-columns: 1fr;
+      gap: 1.75rem;
+    }
+    .footer-brand { grid-column: auto; }
+
+    .fci-value { font-size: 0.75rem; word-break: break-all; }
+  }
+
+  /* Extra small: 360px ke bawah */
+  @media (max-width: 360px) {
+    .about-title { font-size: 1.4rem; }
+    .detail-row .dk, .detail-row .dv { font-size: 0.73rem; }
+  }
+</style>
+
+<div class="about-header">
+  <h1 class="about-title">About the Model</h1>
+  <p class="about-sub">Deep learning pipeline and technical implementation details</p>
+</div>
+
+<div class="pipeline-section">
+  <div class="section-title">Training Pipeline</div>
+  <div class="pipeline-scroll">
+
+    <div class="pipeline-step">
+      <div class="step-icon"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="4" rx="1.5"/><rect x="3" y="10" width="18" height="4" rx="1.5"/><rect x="3" y="16" width="18" height="4" rx="1.5"/></svg></div>
+      <div class="step-content">
+        <div class="step-name">Dataset</div>
+        <div class="step-desc">30k images — Kaggle (xhlulu)<br>60 / 20 / 20 %</div>
+      </div>
+    </div>
+
+    <div class="step-arrow">→</div>
+
+    <div class="pipeline-step">
+      <div class="step-icon"><svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/><circle cx="8" cy="6" r="2"/><circle cx="15" cy="12" r="2"/><circle cx="10" cy="18" r="2"/></svg></div>
+      <div class="step-content">
+        <div class="step-name">Preprocessing</div>
+        <div class="step-desc">Resize 224×224 &amp; EfficientNet normalize</div>
+      </div>
+    </div>
+
+    <div class="step-arrow">→</div>
+
+    <div class="pipeline-step">
+      <div class="step-icon"><svg viewBox="0 0 24 24"><rect x="2" y="2" width="9" height="9" rx="1.5"/><rect x="13" y="2" width="9" height="9" rx="1.5"/><rect x="2" y="13" width="9" height="9" rx="1.5"/><path d="M17 13 A5 5 0 0 1 22 18" fill="none"/><polyline points="20,13 22,18 17,18"/></svg></div>
+      <div class="step-content">
+        <div class="step-name">Augmentation</div>
+        <div class="step-desc">Rotation ±15°, flip, zoom, brightness</div>
+      </div>
+    </div>
+
+    <div class="step-arrow">→</div>
+
+    <div class="pipeline-step">
+      <div class="step-icon"><svg viewBox="0 0 24 24"><circle cx="3" cy="6" r="1.5"/><circle cx="3" cy="12" r="1.5"/><circle cx="3" cy="18" r="1.5"/><circle cx="12" cy="4" r="1.5"/><circle cx="12" cy="10" r="1.5"/><circle cx="12" cy="16" r="1.5"/><circle cx="12" cy="22" r="1.5"/><circle cx="21" cy="8" r="1.5"/><circle cx="21" cy="16" r="1.5"/><line x1="4.5" y1="6" x2="10.5" y2="4"/><line x1="4.5" y1="6" x2="10.5" y2="10"/><line x1="4.5" y1="12" x2="10.5" y2="10"/><line x1="4.5" y1="12" x2="10.5" y2="16"/><line x1="4.5" y1="18" x2="10.5" y2="16"/><line x1="4.5" y1="18" x2="10.5" y2="22"/><line x1="13.5" y1="4" x2="19.5" y2="8"/><line x1="13.5" y1="10" x2="19.5" y2="8"/><line x1="13.5" y1="16" x2="19.5" y2="16"/><line x1="13.5" y1="22" x2="19.5" y2="16"/></svg></div>
+      <div class="step-content">
+        <div class="step-name">EfficientNetB0</div>
+        <div class="step-desc">ImageNet weights<br>Phase 1: base frozen</div>
+      </div>
+    </div>
+
+    <div class="step-arrow">→</div>
+
+    <div class="pipeline-step">
+      <div class="step-icon"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+      <div class="step-content">
+        <div class="step-name">Fine-tuning</div>
+        <div class="step-desc">Phase 2: unfreeze 20 last layers<br>lr = 1e-5</div>
+      </div>
+    </div>
+
+    <div class="step-arrow">→</div>
+
+    <div class="pipeline-step">
+      <div class="step-icon"><svg viewBox="0 0 24 24"><rect x="8" y="2" width="8" height="5" rx="1.5"/><rect x="4" y="10" width="16" height="5" rx="1.5"/><rect x="9" y="18" width="6" height="4" rx="1.5"/><line x1="12" y1="7" x2="12" y2="10"/><line x1="12" y1="15" x2="12" y2="18"/></svg></div>
+      <div class="step-content">
+        <div class="step-name">Custom Head</div>
+        <div class="step-desc">Dense(256) → Dropout(0.4)<br>Dense(128) → Dropout(0.3)</div>
+      </div>
+    </div>
+
+    <div class="step-arrow">→</div>
+
+    <div class="pipeline-step">
+      <div class="step-icon"><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="2.5"/><line x1="7.5" y1="12" x2="11" y2="12"/><line x1="11" y1="12" x2="14" y2="7"/><line x1="11" y1="12" x2="14" y2="17"/><rect x="14" y="4" width="7" height="6" rx="1.5"/><rect x="14" y="14" width="7" height="6" rx="1.5"/><polyline points="15,7 17,9 20,5"/><line x1="15" y1="17" x2="21" y2="17"/><line x1="15" y1="19" x2="19" y2="19"/></svg></div>
+      <div class="step-content">
+        <div class="step-name">Prediction</div>
+        <div class="step-desc">Real / Fake output<br>Threshold: 0.67</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="detail-grid">
+  <div class="detail-card">
+    <div class="detail-card-title">
+      <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      Training Details
+    </div>
+    <div class="detail-row"><span class="dk">Phase 1: Base Frozen — Epochs</span><span class="dv">20</span></div>
+    <div class="detail-row"><span class="dk">Phase 1 Learning Rate</span><span class="dv">3e-4</span></div>
+    <div class="detail-row"><span class="dk">Batch Size</span><span class="dv">16</span></div>
+    <div class="detail-row"><span class="dk">Phase 2: Fine-tuning — Max Epochs</span><span class="dv">40</span></div>
+    <div class="detail-row"><span class="dk">Phase 2 Learning Rate</span><span class="dv">1e-5</span></div>
+    <div class="detail-row"><span class="dk">Optimizer</span><span class="dv">Adam</span></div>
+    <div class="detail-row"><span class="dk">Loss Function</span><span class="dv">Binary Crossentropy</span></div>
+    <div class="detail-row"><span class="dk">Early Stopping Patience</span><span class="dv">P1: 6 / P2: 12 epoch</span></div>
+    <div class="detail-row"><span class="dk">Optimal Threshold</span><span class="dv green">0.67</span></div>
+  </div>
+
+  <div class="detail-card">
+    <div class="detail-card-title">
+      <svg viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+      Dataset Information
+    </div>
+    <div class="detail-row"><span class="dk">Source</span><span class="dv">Kaggle — xhlulu</span></div>
+    <div class="detail-row"><span class="dk">Full Dataset</span><span class="dv">140,000 images</span></div>
+    <div class="detail-row"><span class="dk">Subset Used</span><span class="dv">30,000 images</span></div>
+    <div class="detail-row"><span class="dk">Real Images</span><span class="dv">15,000</span></div>
+    <div class="detail-row"><span class="dk">Fake Images</span><span class="dv">15,000</span></div>
+    <div class="detail-row"><span class="dk">Train / Val / Test Split</span><span class="dv">60 / 20 / 20 %</span></div>
+    <div class="detail-row"><span class="dk">Input Size</span><span class="dv">224 × 224 px</span></div>
+    <div class="detail-row"><span class="dk">Model File</span><span class="dv" style="font-size:0.72rem; word-break:break-all;">realvsfake_effnetB0_final.h5</span></div>
+  </div>
+</div>
+
+<!-- ── FOOTER ── -->
+<footer class="site-footer">
+  <div class="footer-inner">
+
+    <!-- Brand -->
+    <div class="footer-brand">
+      <div class="footer-logo">
+        <div class="footer-logo-icon">AI</div>
+        <span class="footer-logo-name">Image Detector</span>
+      </div>
+      <p class="footer-tagline">AI-powered real vs fake image detection using EfficientNetB0. Fast, accurate, and reliable classification for modern applications.</p>
+    </div>
+
+    <!-- Quick Links -->
+    <div>
+      <div class="footer-col-title">Quick Links</div>
+      <div class="footer-links">
+        <a href="/" class="footer-link">Home</a>
+        <a href="/demo" class="footer-link">Demo</a>
+        <a href="/performance" class="footer-link">Performance</a>
+        <a href="/about" class="footer-link">About</a>
+      </div>
+    </div>
+
+    <!-- Connect -->
+    <div>
+      <div class="footer-col-title">Connect</div>
+      <div class="footer-contact-list">
+
+        <a href="https://github.com/ermilaamanda102" target="_blank" class="footer-contact-item">
+          <div class="fci-icon">
+            <svg viewBox="0 0 24 24">
+              <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/>
+            </svg>
+          </div>
+          <div class="fci-info">
+            <div class="fci-label">GitHub</div>
+            <div class="fci-value">ermilaamanda102</div>
+          </div>
+        </a>
+
+        <a href="mailto:ermila.amanda102@gmail.com" class="footer-contact-item">
+          <div class="fci-icon">
+            <svg viewBox="0 0 24 24">
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+              <polyline points="22,6 12,13 2,6"/>
+            </svg>
+          </div>
+          <div class="fci-info">
+            <div class="fci-label">Email</div>
+            <div class="fci-value">ermila.amanda102@gmail.com</div>
+          </div>
+        </a>
+
+      </div>
+    </div>
+
+  </div>
+
+  <div class="footer-bottom">
+    <p class="footer-copy">© 2026 AI Image Detector. Built with <span>TensorFlow</span> &amp; <span>EfficientNetB0</span>.</p>
+  </div>
+</footer>
+
+{% endblock %}

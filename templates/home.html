@@ -1,0 +1,290 @@
+{% extends "base.html" %}
+{% block content %}
+{% set active='home' %}
+
+<style>
+  .home-wrap {
+    position: relative;
+    z-index: 1;
+    padding: 0 1rem;
+  }
+
+  .hero {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 3.5rem 0 3rem;
+  }
+
+  @media (max-width: 480px) {
+    .hero { padding: 2.25rem 0 2rem; }
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(74,222,128,0.08);
+    border: 1px solid rgba(74,222,128,0.35);
+    border-radius: 9999px;
+    padding: 0.35rem 1rem;
+    font-size: 0.78rem;
+    color: #4ade80;
+    font-weight: 500;
+    margin-bottom: 1.5rem;
+    letter-spacing: 0.02em;
+    text-align: center;
+    max-width: 90vw;
+  }
+  .badge-dot {
+    width: 7px; height: 7px;
+    background: #4ade80;
+    border-radius: 50%;
+    flex-shrink: 0;
+    animation: pulse-dot 2s ease-in-out infinite;
+  }
+  @keyframes pulse-dot {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50%       { opacity: 0.5; transform: scale(0.7); }
+  }
+
+  .hero-title {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: clamp(1.9rem, 5.5vw, 4.5rem);
+    font-weight: 900;
+    color: #ffffff;
+    letter-spacing: -0.03em;
+    line-height: 1.08;
+    margin: 0 0 1.1rem;
+    max-width: 860px;
+  }
+  .hero-title span {
+    background: linear-gradient(135deg, #1d9e75, #22c55e);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .hero-sub {
+    font-size: clamp(0.875rem, 2vw, 1rem);
+    color: #6b7280;
+    line-height: 1.7;
+    margin: 0 0 2rem;
+    max-width: 480px;
+  }
+
+  .btn-group {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: #4ade80;
+    color: #0d0e17;
+    font-weight: 800;
+    font-size: clamp(0.875rem, 2vw, 1rem);
+    padding: 0.8rem 1.8rem;
+    border-radius: 0.75rem;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.2s, transform 0.15s;
+    white-space: nowrap;
+  }
+  .btn-primary:hover { background: #2de05a; transform: translateY(-1px); }
+
+  .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(255,255,255,0.04);
+    color: #e5e7eb;
+    font-weight: 600;
+    font-size: clamp(0.875rem, 2vw, 1rem);
+    padding: 0.8rem 1.8rem;
+    border-radius: 0.75rem;
+    border: 1px solid rgba(255,255,255,0.12);
+    text-decoration: none;
+    transition: border-color 0.2s, background 0.2s, transform 0.15s;
+    white-space: nowrap;
+  }
+  .btn-secondary:hover {
+    border-color: rgba(74,222,128,0.4);
+    background: rgba(74,222,128,0.05);
+    transform: translateY(-1px);
+  }
+
+  @media (max-width: 360px) {
+    .btn-group { flex-direction: column; align-items: center; }
+    .btn-primary, .btn-secondary { width: 100%; justify-content: center; }
+  }
+
+  .hero-divider {
+    border: none;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    margin: 0;
+    position: relative;
+    z-index: 1;
+  }
+
+  .stats-bar {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.875rem;
+    padding: 2rem 0 2rem;
+    position: relative;
+    z-index: 1;
+  }
+
+  @media (max-width: 900px) {
+    .stats-bar { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  @media (max-width: 420px) {
+    .stats-bar {
+      grid-template-columns: 1fr 1fr;
+      gap: 0.625rem;
+      padding: 1.5rem 0 1.5rem;
+    }
+  }
+
+  .stat-card {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 1rem;
+    padding: 1.25rem 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.625rem;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+  .stat-card:hover {
+    border-color: rgba(74,222,128,0.25);
+    transform: translateY(-2px);
+  }
+
+  @media (max-width: 380px) {
+    .stat-card { padding: 1rem 0.75rem; border-radius: 0.75rem; }
+  }
+
+  .stat-icon {
+    width: 36px; height: 36px;
+    background: rgba(74,222,128,0.1);
+    border-radius: 0.55rem;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .stat-icon svg {
+    width: 16px; height: 16px;
+    stroke: #4ade80;
+    fill: none;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .stat-value {
+    font-size: clamp(1.25rem, 3.5vw, 1.9rem);
+    font-weight: 800;
+    color: #ffffff;
+    line-height: 1;
+  }
+  .stat-label {
+    font-size: clamp(0.7rem, 1.8vw, 0.82rem);
+    color: #6b7280;
+    margin-top: 0.1rem;
+  }
+
+  .fade-up {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeUp 0.7s ease forwards;
+  }
+  .fade-up:nth-child(1) { animation-delay: 0.05s; }
+  .fade-up:nth-child(2) { animation-delay: 0.15s; }
+  .fade-up:nth-child(3) { animation-delay: 0.25s; }
+  .fade-up:nth-child(4) { animation-delay: 0.35s; }
+  .fade-up:nth-child(5) { animation-delay: 0.45s; }
+
+  @keyframes fadeUp {
+    to { opacity: 1; transform: translateY(0); }
+  }
+</style>
+
+<div class="home-wrap">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="badge fade-up">
+      <span class="badge-dot"></span>
+      AI-Powered Detection System
+    </div>
+
+    <h1 class="hero-title fade-up">Real vs <span>Fake Face</span> Detection</h1>
+
+    <p class="hero-sub fade-up">
+      Powered by EfficientNetB0 — 95.23% Accuracy &amp; 0.9902 AUC.
+      Deteksi wajah AI-generated dengan threshold optimal 0.67.
+    </p>
+
+    <div class="btn-group fade-up">
+      <a href="/demo" class="btn-primary">Coba Demo →</a>
+      <a href="/performance" class="btn-secondary">Lihat Performa Model</a>
+    </div>
+  </div>
+
+  <hr class="hero-divider">
+
+  <!-- STATS -->
+  <div class="stats-bar">
+
+    <div class="stat-card fade-up">
+      <div class="stat-icon">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+      </div>
+      <div>
+        <div class="stat-value">95.23%</div>
+        <div class="stat-label">Accuracy</div>
+      </div>
+    </div>
+
+    <div class="stat-card fade-up">
+      <div class="stat-icon">
+        <svg viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+      </div>
+      <div>
+        <div class="stat-value">0.9902</div>
+        <div class="stat-label">AUC Score</div>
+      </div>
+    </div>
+
+    <div class="stat-card fade-up">
+      <div class="stat-icon">
+        <svg viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+      </div>
+      <div>
+        <div class="stat-value">30,000</div>
+        <div class="stat-label">Dataset Images</div>
+      </div>
+    </div>
+
+    <div class="stat-card fade-up">
+      <div class="stat-icon">
+        <svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/></svg>
+      </div>
+      <div>
+        <div class="stat-value">0.9530</div>
+        <div class="stat-label">F1-Score Macro</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+{% endblock %}
